@@ -13,6 +13,8 @@ Apache Kafka is used for real time streaming of stock and news data.
 Spark is used quickly calculate the features needed to do ML model inference (combination of TA, SA, and other metrics), as well as complicated financial derivates pricing calculations.
 
 ## Portfolio Management Microservice
+This service leverages statistical portfolio management to constantly maintain an optimal portfolio for our given risk tolerance. This service  decides which stocks to invest in, at what weights, and models pricing of options derivatives. 
+
 more to come (and a name)
 
 ## Prediction Microservice
