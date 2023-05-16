@@ -5,3 +5,18 @@ User's can view and track the software's trades in real-time, and will explore t
 
 # Architecture
 ![Quanta drawio](https://github.com/ndavidson19/quanta/assets/59320455/55c9435a-31d6-4443-a805-bcfa6e429831)
+
+## Kafka
+Apache Kafka is used for real time streaming of stock and news data.
+
+## Spark
+Spark is used quickly calculate the features needed to do ML model inference (combination of TA, SA, and other metrics), as well as complicated financial derivates pricing calculations.
+
+## Portfolio Management Microservice
+more to come (and a name)
+
+## Prediction Microservice
+more to come (and a name)
+
+## Trading Microservice
+more to come (and a name)
