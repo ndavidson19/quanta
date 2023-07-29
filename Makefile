@@ -14,7 +14,7 @@ dropdb:
 	docker exec -it postgres15 dropdb go_client
 
 install:
-	curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz sudo mv migrate /usr/bin/ which migrate 
+	curl -L https://github.com/golang-migrate/migrate/releases/download/v4.16.2/migrate.linux-amd64.tar.gz | tar xvz | sudo mv migrate /usr/bin/ 
 
 migrateup:
 	migrate -path db-migration -database "postgresql://root:secret@localhost:5432/go_client?sslmode=disable" -verbose up
