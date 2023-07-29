@@ -1,11 +1,10 @@
 package db
 
 import (
-	"database/sql"
 	"context"
+	"database/sql"
 	"fmt"
 )
-
 
 // Store provides all functions to execute db queries and transactions
 type Store struct {
@@ -13,11 +12,10 @@ type Store struct {
 	db *sql.DB
 }
 
-
 // NewStore creates a new store
 func NewStore(db *sql.DB) *Store {
 	return &Store{
-		db: db,
+		db:      db,
 		Queries: New(db),
 	}
 }
@@ -49,45 +47,58 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 
 type CreateTxParams struct {
 	AccountID int64 `json:"account_id"`
-	Amount int64 `json:"amount"`
+	Amount    int64 `json:"amount"`
 }
 
 type CreateTxResult struct {
-	Account Account `json:"account"`
-	Deposit Deposit `json:"deposit"`
+	Account  Account  `json:"account"`
+	Deposit  Deposit  `json:"deposit"`
 	AuditLog AuditLog `json:"audit_log"`
-	Balance int64 `json:"balance"`
+	Balance  int64    `json:"balance"`
 }
+
+var txKey = struct{}{}
 
 func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxResult, error) {
 	var result CreateTxResult
-	
+
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
+		txName := ctx.Value(txKey)
+
+		fmt.Println(">> tx name: ", txName, "create account: ", arg.AccountID, "amount: ", arg.Amount)
+
 		result.Account, err = q.CreateAccount(ctx, CreateAccountParams{
-			Owner: arg.Owner,
-			Balance: arg.Amount,
+			Owner:    arg.Owner,
+			Balance:  arg.Amount,
 			Currency: arg.Currency,
 		})
 		if err != nil {
 			return err
 		}
+
+		fmt.Println(">> tx name: ", txName, "create deposit: ", arg.AccountID, "amount: ", arg.Amount)
+
 		result.Deposit, err = q.CreateDeposit(ctx, CreateDepositParams{
 			AccountID: result.Account.ID,
-			Amount: arg.Amount,
+			Amount:    arg.Amount,
 		})
 		if err != nil {
 			return err
 		}
+
+		fmt.Println(">> tx name: ", txName, "create audit log: ", arg.AccountID, "amount: ", arg.Amount)
 		result.AuditLog, err = q.CreateLogs(ctx, CreateAuditLogParams{
 			AccountID: result.Account.ID,
-			Action: "deposit",
+			Action:    "deposit",
 			Timestamp: result.Deposit.CreatedAt,
 		})
 		if err != nil {
 			return err
 		}
+
+		fmt.Println(">> tx name: ", txName, "get balance: ", arg.AccountID, "amount: ", arg.Amount)
 		result.Balance, err = q.GetBalance(ctx, result.Account.ID)
 		if err != nil {
 			return err
@@ -104,31 +115,31 @@ func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxR
 // 4. Create a new entry in the portfolio_balances table representing the trade
 
 type TradeTxParams struct {
-	AccountID int64 `json:"account_id"`
-	Symbol string `json:"symbol"`
-	Amount int32 `json:"amount"`
-	Price string `json:"price"`
+	AccountID int64  `json:"account_id"`
+	Symbol    string `json:"symbol"`
+	Amount    int32  `json:"amount"`
+	Price     string `json:"price"`
 	TradeType string `json:"trade_type"`
 }
 
 type TradeTxResult struct {
-	Trade Trade `json:"trade"`
-	AuditLog AuditLog `json:"audit_log"`
-	Balance int64 `json:"balance"`
+	Trade            Trade            `json:"trade"`
+	AuditLog         AuditLog         `json:"audit_log"`
+	Balance          int64            `json:"balance"`
 	PortfolioBalance PortfolioBalance `json:"portfolio_balance"`
 }
 
 func (store *Store) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResult, error) {
 	var result TradeTxResult
-	
+
 	err := store.execTx(ctx, func(q *Queries) error {
 		var err error
 
 		result.Trade, err = q.CreateTrade(ctx, CreateTradeParams{
 			AccountID: arg.AccountID,
-			Symbol: arg.Symbol,
-			Amount: arg.Amount,
-			Price: arg.Price,
+			Symbol:    arg.Symbol,
+			Amount:    arg.Amount,
+			Price:     arg.Price,
 			TradeType: arg.TradeType,
 		})
 		if err != nil {
@@ -136,7 +147,7 @@ func (store *Store) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResu
 		}
 		result.AuditLog, err = q.CreateLogs(ctx, CreateAuditLogParams{
 			AccountID: arg.AccountID,
-			Action: "trade",
+			Action:    "trade",
 			Timestamp: result.Trade.CreatedAt,
 		})
 		if err != nil {
@@ -148,8 +159,8 @@ func (store *Store) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResu
 		}
 		result.PortfolioBalance, err = q.CreatePortfolioBalance(ctx, CreatePortfolioBalanceParams{
 			AccountID: arg.AccountID,
-			Symbol: arg.Symbol,
-			Amount: arg.Amount,
+			Symbol:    arg.Symbol,
+			Amount:    arg.Amount,
 		})
 		if err != nil {
 			return err
@@ -158,6 +169,3 @@ func (store *Store) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResu
 	})
 	return result, err
 }
-
-
-
