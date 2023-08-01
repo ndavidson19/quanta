@@ -18,7 +18,7 @@ jobs:
         image: postgres:15
         # Provide the password for postgres
         env:
-          POSTGRES_USER: user
+          POSTGRES_USER: root
           POSTGRES_PASSWORD: secret
           POSTGRES_DB: go_client
           
