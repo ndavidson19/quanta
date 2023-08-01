@@ -1,22 +1,24 @@
 package db
 
-import ("database/sql"
-	"testing"
-	"os"
+import (
+	"database/sql"
 	"log"
+	"os"
+	"testing"
 
-	_ "github.com/lib/pq")
+	_ "github.com/lib/pq"
+)
 
 var testQueries *Queries
 var testDB *sql.DB
 
 const (
 	dbDriver = "postgres"
-	dbSource = "postgresql://root:secret@localhost:5432/go_client?sslmode=disable"
+	dbSource = "postgresql://root:secret@localhost:5433/go_client?sslmode=disable"
 )
 
 func TestMain(m *testing.M) {
-	var err error 
+	var err error
 
 	testDB, err = sql.Open(dbDriver, dbSource)
 	if err != nil {
