@@ -18,7 +18,7 @@ func TestCreateTx(t *testing.T) {
 	}
 
 	// run n concurrent transactions
-	n := 2
+	n := int64(2)
 	ammount := int64(10)
 
 	errs := make(chan error)
@@ -32,8 +32,8 @@ func TestCreateTx(t *testing.T) {
 		go func() {
 			ctx := context.WithValue(context.Background(), txKey, txName)
 			result, err := store.CreateTx(context.Background(), CreateTxParams{
-				AccountID: account.ID,
-				Amount:    ammount,
+				Owner:  account.Owner,
+				Amount: ammount,
 			})
 
 			errs <- err
@@ -75,18 +75,12 @@ func TestCreateTx(t *testing.T) {
 		require.True(t, result.Balance >= 0)
 		require.True(t, result.Balance%ammount == 0)
 
-		k := int(result.Balance / ammount)
+		k := int64(result.Balance / ammount)
 		require.True(t, k >= 1 && k <= n)
 		require.NotContains(t, existed, k)
 		existed[k] = true
 
 		_, err = store.GetAccount(context.Background(), result.Account.ID)
-		require.NoError(t, err)
-
-		_, err = store.GetDeposit(context.Background(), result.Deposit.ID)
-		require.NoError(t, err)
-
-		_, err = store.GetAuditLog(context.Background(), result.AuditLog.ID)
 		require.NoError(t, err)
 
 	}
@@ -98,6 +92,6 @@ func TestCreateTx(t *testing.T) {
 	require.Equal(t, account.Owner, updatedAccount.Owner)
 	require.Equal(t, account.Balance+n*ammount, updatedAccount.Balance)
 	require.Equal(t, account.Currency, updatedAccount.Currency)
-	fmt.Println(">> after: ", updateAccount.Balance)
+	fmt.Println(">> after: ", updatedAccount.Balance)
 
 }

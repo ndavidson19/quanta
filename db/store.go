@@ -46,8 +46,8 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 // 6. Create a new entry in the audit_log table representing the initial deposit
 
 type CreateTxParams struct {
-	AccountID int64 `json:"account_id"`
-	Amount    int64 `json:"amount"`
+	Owner  string `json:"owner"`
+	Amount int64  `json:"amount"`
 }
 
 type CreateTxResult struct {
@@ -67,18 +67,17 @@ func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxR
 
 		txName := ctx.Value(txKey)
 
-		fmt.Println(">> tx name: ", txName, "create account: ", arg.AccountID, "amount: ", arg.Amount)
+		fmt.Println(">> tx name: ", txName, "create account: ", arg.Owner, "amount: ", arg.Amount)
 
 		result.Account, err = q.CreateAccount(ctx, CreateAccountParams{
-			Owner:    arg.Owner,
-			Balance:  arg.Amount,
-			Currency: arg.Currency,
+			Owner:   arg.Owner,
+			Balance: arg.Amount,
 		})
 		if err != nil {
 			return err
 		}
 
-		fmt.Println(">> tx name: ", txName, "create deposit: ", arg.AccountID, "amount: ", arg.Amount)
+		fmt.Println(">> tx name: ", txName, "create deposit: ", arg.Owner, "amount: ", arg.Amount)
 
 		result.Deposit, err = q.CreateDeposit(ctx, CreateDepositParams{
 			AccountID: result.Account.ID,
@@ -88,83 +87,6 @@ func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxR
 			return err
 		}
 
-		fmt.Println(">> tx name: ", txName, "create audit log: ", arg.AccountID, "amount: ", arg.Amount)
-		result.AuditLog, err = q.CreateLogs(ctx, CreateAuditLogParams{
-			AccountID: result.Account.ID,
-			Action:    "deposit",
-			Timestamp: result.Deposit.CreatedAt,
-		})
-		if err != nil {
-			return err
-		}
-
-		fmt.Println(">> tx name: ", txName, "get balance: ", arg.AccountID, "amount: ", arg.Amount)
-		result.Balance, err = q.GetBalance(ctx, result.Account.ID)
-		if err != nil {
-			return err
-		}
-		return nil
-	})
-	return result, err
-}
-
-// This transaction performs the following operations atomically:
-// 1. Create a new entry in the trades table representing the trade
-// 2. Create a new entry in the audit_log table representing the trade
-// 3. Update the balance in the accounts table
-// 4. Create a new entry in the portfolio_balances table representing the trade
-
-type TradeTxParams struct {
-	AccountID int64  `json:"account_id"`
-	Symbol    string `json:"symbol"`
-	Amount    int32  `json:"amount"`
-	Price     string `json:"price"`
-	TradeType string `json:"trade_type"`
-}
-
-type TradeTxResult struct {
-	Trade            Trade            `json:"trade"`
-	AuditLog         AuditLog         `json:"audit_log"`
-	Balance          int64            `json:"balance"`
-	PortfolioBalance PortfolioBalance `json:"portfolio_balance"`
-}
-
-func (store *Store) TradeTx(ctx context.Context, arg TradeTxParams) (TradeTxResult, error) {
-	var result TradeTxResult
-
-	err := store.execTx(ctx, func(q *Queries) error {
-		var err error
-
-		result.Trade, err = q.CreateTrade(ctx, CreateTradeParams{
-			AccountID: arg.AccountID,
-			Symbol:    arg.Symbol,
-			Amount:    arg.Amount,
-			Price:     arg.Price,
-			TradeType: arg.TradeType,
-		})
-		if err != nil {
-			return err
-		}
-		result.AuditLog, err = q.CreateLogs(ctx, CreateAuditLogParams{
-			AccountID: arg.AccountID,
-			Action:    "trade",
-			Timestamp: result.Trade.CreatedAt,
-		})
-		if err != nil {
-			return err
-		}
-		result.Balance, err = q.GetBalance(ctx, arg.AccountID)
-		if err != nil {
-			return err
-		}
-		result.PortfolioBalance, err = q.CreatePortfolioBalance(ctx, CreatePortfolioBalanceParams{
-			AccountID: arg.AccountID,
-			Symbol:    arg.Symbol,
-			Amount:    arg.Amount,
-		})
-		if err != nil {
-			return err
-		}
 		return nil
 	})
 	return result, err
