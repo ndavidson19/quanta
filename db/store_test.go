@@ -26,7 +26,7 @@ func TestCreateTx(t *testing.T) {
 
 	fmt.Println(">> before: ", account.Balance)
 
-	for i := 0; i < n; i++ {
+	for i := int64(0); i < n; i++ {
 		txName := fmt.Sprintf("tx %d", i+1)
 
 		go func() {
@@ -38,13 +38,13 @@ func TestCreateTx(t *testing.T) {
 
 			errs <- err
 			results <- result
-
+			ctx.Done()
 		}()
 	}
 
 	existed := make(map[int64]bool)
 	// check results
-	for i := 0; i < n; i++ {
+	for i := int64(0); i < n; i++ {
 		err := <-errs
 		require.NoError(t, err)
 
