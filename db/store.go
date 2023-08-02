@@ -46,8 +46,10 @@ func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
 // 6. Create a new entry in the audit_log table representing the initial deposit
 
 type CreateTxParams struct {
-	Owner  string `json:"owner"`
-	Amount int64  `json:"amount"`
+	AccountID int64  `json:"account_id"`
+	Owner     string `json:"owner"`
+	Amount    int64  `json:"amount"`
+	Currency  string `json:"currency"`
 }
 
 type CreateTxResult struct {
@@ -70,8 +72,10 @@ func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxR
 		fmt.Println(">> tx name: ", txName, "create account: ", arg.Owner, "amount: ", arg.Amount)
 
 		result.Account, err = q.CreateAccount(ctx, CreateAccountParams{
-			Owner:   arg.Owner,
-			Balance: arg.Amount,
+			ID:       arg.AccountID,
+			Owner:    arg.Owner,
+			Balance:  arg.Amount,
+			Currency: arg.Currency,
 		})
 		if err != nil {
 			return err
