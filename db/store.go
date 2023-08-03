@@ -6,22 +6,27 @@ import (
 	"fmt"
 )
 
-// Store provides all functions to execute db queries and transactions
-type Store struct {
+type Store interface {
+	Querier
+	CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxResult, error)
+}
+
+// Store provides all functions to execute SQL queries and transactions
+type SQLStore struct {
 	*Queries
 	db *sql.DB
 }
 
 // NewStore creates a new store
-func NewStore(db *sql.DB) *Store {
-	return &Store{
+func NewStore(db *sql.DB) Store {
+	return &SQLStore{
 		db:      db,
 		Queries: New(db),
 	}
 }
 
 // execTx executes a function within a database transaction
-func (store *Store) execTx(ctx context.Context, fn func(*Queries) error) error {
+func (store *SQLStore) execTx(ctx context.Context, fn func(*Queries) error) error {
 	tx, err := store.db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -61,7 +66,7 @@ type CreateTxResult struct {
 
 var txKey = struct{}{}
 
-func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxResult, error) {
+func (store *SQLStore) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxResult, error) {
 	var result CreateTxResult
 
 	err := store.execTx(ctx, func(q *Queries) error {
@@ -72,7 +77,6 @@ func (store *Store) CreateTx(ctx context.Context, arg CreateTxParams) (CreateTxR
 		fmt.Println(">> tx name: ", txName, "create account: ", arg.Owner, "amount: ", arg.Amount)
 
 		result.Account, err = q.CreateAccount(ctx, CreateAccountParams{
-			ID:       arg.AccountID,
 			Owner:    arg.Owner,
 			Balance:  arg.Amount,
 			Currency: arg.Currency,

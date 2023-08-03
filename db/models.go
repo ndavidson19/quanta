@@ -10,50 +10,50 @@ import (
 )
 
 type Account struct {
-	ID        int64
-	Owner     string
-	Balance   int64
-	Currency  string
-	CreatedAt time.Time
+	ID        int64     `json:"id"`
+	Owner     string    `json:"owner"`
+	Balance   int64     `json:"balance"`
+	Currency  string    `json:"currency"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type AuditLog struct {
-	ID        int64
-	AccountID int64
-	Action    sql.NullString
-	Timestamp sql.NullTime
+	ID        int64          `json:"id"`
+	AccountID int64          `json:"account_id"`
+	Action    sql.NullString `json:"action"`
+	Timestamp sql.NullTime   `json:"timestamp"`
 }
 
 type Deposit struct {
-	ID        int64
-	AccountID int64
-	Amount    int64
-	CreatedAt time.Time
+	ID        int64     `json:"id"`
+	AccountID int64     `json:"account_id"`
+	Amount    int64     `json:"amount"`
+	CreatedAt time.Time `json:"created_at"`
 }
 
 type PortfolioBalance struct {
-	ID          int64
-	AccountID   int64
-	Symbol      sql.NullString
-	Amount      sql.NullInt32
-	LastUpdated sql.NullTime
+	ID          int64          `json:"id"`
+	AccountID   int64          `json:"account_id"`
+	Symbol      sql.NullString `json:"symbol"`
+	Amount      sql.NullInt32  `json:"amount"`
+	LastUpdated sql.NullTime   `json:"last_updated"`
 }
 
 type Trade struct {
-	ID        int64
-	AccountID int64
-	Symbol    sql.NullString
+	ID        int64          `json:"id"`
+	AccountID int64          `json:"account_id"`
+	Symbol    sql.NullString `json:"symbol"`
 	// must be positive
-	Amount    int32
-	Price     string
-	TradeType sql.NullString
-	CreatedAt sql.NullTime
+	Amount    int32          `json:"amount"`
+	Price     string         `json:"price"`
+	TradeType sql.NullString `json:"trade_type"`
+	CreatedAt sql.NullTime   `json:"created_at"`
 }
 
 type User struct {
-	ID          int64
-	FullName    sql.NullString
-	ContactInfo sql.NullString
-	AccountID   int64
-	CreatedAt   sql.NullTime
+	ID          int64          `json:"id"`
+	FullName    sql.NullString `json:"full_name"`
+	ContactInfo sql.NullString `json:"contact_info"`
+	AccountID   int64          `json:"account_id"`
+	CreatedAt   sql.NullTime   `json:"created_at"`
 }

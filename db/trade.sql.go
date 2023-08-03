@@ -26,13 +26,13 @@ RETURNING id, account_id, symbol, amount, price, trade_type, created_at
 `
 
 type CreateTradeParams struct {
-	ID        int64
-	AccountID int64
-	Symbol    sql.NullString
-	Amount    int32
-	Price     string
-	TradeType sql.NullString
-	CreatedAt sql.NullTime
+	ID        int64          `json:"id"`
+	AccountID int64          `json:"account_id"`
+	Symbol    sql.NullString `json:"symbol"`
+	Amount    int32          `json:"amount"`
+	Price     string         `json:"price"`
+	TradeType sql.NullString `json:"trade_type"`
+	CreatedAt sql.NullTime   `json:"created_at"`
 }
 
 func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade, error) {
@@ -86,8 +86,8 @@ OFFSET $2
 `
 
 type ListTradesParams struct {
-	Limit  int32
-	Offset int32
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade, error) {
@@ -96,7 +96,7 @@ func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade
 		return nil, err
 	}
 	defer rows.Close()
-	var items []Trade
+	items := []Trade{}
 	for rows.Next() {
 		var i Trade
 		if err := rows.Scan(

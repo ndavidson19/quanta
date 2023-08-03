@@ -31,8 +31,8 @@ SELECT id, account_id, action, timestamp FROM audit_logs ORDER BY account_id LIM
 `
 
 type ListLogsParams struct {
-	Limit  int32
-	Offset int32
+	Limit  int32 `json:"limit"`
+	Offset int32 `json:"offset"`
 }
 
 func (q *Queries) ListLogs(ctx context.Context, arg ListLogsParams) ([]AuditLog, error) {
@@ -41,7 +41,7 @@ func (q *Queries) ListLogs(ctx context.Context, arg ListLogsParams) ([]AuditLog,
 		return nil, err
 	}
 	defer rows.Close()
-	var items []AuditLog
+	items := []AuditLog{}
 	for rows.Next() {
 		var i AuditLog
 		if err := rows.Scan(

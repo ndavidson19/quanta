@@ -28,4 +28,7 @@ test:
 server: 
 	go run main.go
 
-.PHONY: createdb dropdb migrateup migratedown postgres sqlc test start connect server
+mock: 
+	mockgen -package mockdb -destination db/mock/store.go github.com/ndavidson19/quanta-backend/db Store 
+	
+.PHONY: createdb dropdb migrateup migratedown postgres sqlc test start connect server mock

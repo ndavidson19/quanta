@@ -21,8 +21,8 @@ RETURNING id, account_id, amount, created_at
 `
 
 type CreateDepositParams struct {
-	AccountID int64
-	Amount    int64
+	AccountID int64 `json:"account_id"`
+	Amount    int64 `json:"amount"`
 }
 
 func (q *Queries) CreateDeposit(ctx context.Context, arg CreateDepositParams) (Deposit, error) {
