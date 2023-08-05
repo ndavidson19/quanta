@@ -32,12 +32,14 @@ CREATE TABLE "portfolio_balances" (
 );
 
 CREATE TABLE "users" (
-  "id" bigserial PRIMARY KEY,
-  "full_name" varchar,
-  "contact_info" varchar,
-  "account_id" bigint NOT NULL,
-  "created_at" timestamptz DEFAULT (now())
+  "username" varchar PRIMARY KEY,
+  "hashed_password" varchar NOT NULL,
+  "full_name" varchar NOT NULL,
+  "email" varchar UNIQUE NOT NULL,
+  "password_changed_at" timestamptz NOT NULL DEFAULT '0001-01-01 00:00:00Z',
+  "created_at" timestamptz NOT NULL DEFAULT (now())
 );
+
 
 CREATE TABLE "audit_logs" (
   "id" bigserial PRIMARY KEY,
@@ -65,3 +67,7 @@ ALTER TABLE "portfolio_balances" ADD FOREIGN KEY ("account_id") REFERENCES "acco
 ALTER TABLE "users" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
 
 ALTER TABLE "audit_logs" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
+
+ALTER TABLE "accounts" ADD FOREIGN KEY ("owner") REFERENCES "users" ("username");
+
+ALTER TABLE "accounts" ADD CONSTRAINT "owner_currency_key" UNIQUE ("owner", "currency");

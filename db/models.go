@@ -51,9 +51,10 @@ type Trade struct {
 }
 
 type User struct {
-	ID          int64          `json:"id"`
-	FullName    sql.NullString `json:"full_name"`
-	ContactInfo sql.NullString `json:"contact_info"`
-	AccountID   int64          `json:"account_id"`
-	CreatedAt   sql.NullTime   `json:"created_at"`
+	Username          string    `json:"username"`
+	HashedPassword    string    `json:"hashed_password"`
+	FullName          string    `json:"full_name"`
+	Email             string    `json:"email"`
+	PasswordChangedAt time.Time `json:"password_changed_at"`
+	CreatedAt         time.Time `json:"created_at"`
 }
