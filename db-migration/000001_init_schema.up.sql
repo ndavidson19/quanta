@@ -64,8 +64,6 @@ ALTER TABLE "trades" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id")
 
 ALTER TABLE "portfolio_balances" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
 
-ALTER TABLE "users" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
-
 ALTER TABLE "audit_logs" ADD FOREIGN KEY ("account_id") REFERENCES "accounts" ("id");
 
 ALTER TABLE "accounts" ADD FOREIGN KEY ("owner") REFERENCES "users" ("username");
