@@ -6,22 +6,27 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 type Querier interface {
 	CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error)
 	CreateDeposit(ctx context.Context, arg CreateDepositParams) (Deposit, error)
-	CreateLogs(ctx context.Context, action sql.NullString) (AuditLog, error)
+	CreateLogs(ctx context.Context, arg CreateLogsParams) (AuditLog, error)
 	CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade, error)
+	CreateUser(ctx context.Context, arg CreateUserParams) (User, error)
 	DeleteAccount(ctx context.Context, id int64) error
+	DeleteUser(ctx context.Context, username string) error
 	GetAccount(ctx context.Context, id int64) (Account, error)
 	GetAccountForUpdate(ctx context.Context, id int64) (Account, error)
 	GetTrade(ctx context.Context, id int64) (Trade, error)
+	GetUser(ctx context.Context, username string) (User, error)
+	GetUserForUpdate(ctx context.Context, username string) (User, error)
 	ListAccounts(ctx context.Context, arg ListAccountsParams) ([]Account, error)
 	ListLogs(ctx context.Context, arg ListLogsParams) ([]AuditLog, error)
 	ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade, error)
+	ListUsers(ctx context.Context, arg ListUsersParams) ([]User, error)
 	UpdateAccount(ctx context.Context, arg UpdateAccountParams) error
+	UpdateUser(ctx context.Context, arg UpdateUserParams) error
 }
 
 var _ Querier = (*Queries)(nil)

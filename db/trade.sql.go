@@ -12,38 +12,41 @@ import (
 
 const createTrade = `-- name: CreateTrade :one
 INSERT INTO trades (
-    id,
-    account_id,
-    symbol,
-    amount,
-    price,
-    trade_type,
-    created_at
+  account_id,
+  symbol,
+  amount,
+  price,
+  trade_type,
+  status,
+  created_at,
+  updated_at
 ) VALUES (
-    $1, $2, $3, $4, $5, $6, $7
+  $1, $2, $3, $4, $5, $6, $7, $8
 )
-RETURNING id, account_id, symbol, amount, price, trade_type, created_at
+RETURNING id, account_id, symbol, amount, price, trade_type, status, created_at, updated_at
 `
 
 type CreateTradeParams struct {
-	ID        int64          `json:"id"`
-	AccountID int64          `json:"account_id"`
-	Symbol    sql.NullString `json:"symbol"`
-	Amount    int32          `json:"amount"`
-	Price     string         `json:"price"`
-	TradeType sql.NullString `json:"trade_type"`
-	CreatedAt sql.NullTime   `json:"created_at"`
+	AccountID int64        `json:"account_id"`
+	Symbol    string       `json:"symbol"`
+	Amount    string       `json:"amount"`
+	Price     string       `json:"price"`
+	TradeType string       `json:"trade_type"`
+	Status    string       `json:"status"`
+	CreatedAt sql.NullTime `json:"created_at"`
+	UpdatedAt sql.NullTime `json:"updated_at"`
 }
 
 func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade, error) {
 	row := q.db.QueryRowContext(ctx, createTrade,
-		arg.ID,
 		arg.AccountID,
 		arg.Symbol,
 		arg.Amount,
 		arg.Price,
 		arg.TradeType,
+		arg.Status,
 		arg.CreatedAt,
+		arg.UpdatedAt,
 	)
 	var i Trade
 	err := row.Scan(
@@ -53,13 +56,15 @@ func (q *Queries) CreateTrade(ctx context.Context, arg CreateTradeParams) (Trade
 		&i.Amount,
 		&i.Price,
 		&i.TradeType,
+		&i.Status,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const getTrade = `-- name: GetTrade :one
-SELECT id, account_id, symbol, amount, price, trade_type, created_at FROM trades
+SELECT id, account_id, symbol, amount, price, trade_type, status, created_at, updated_at FROM trades
 WHERE id = $1 LIMIT 1
 `
 
@@ -73,13 +78,15 @@ func (q *Queries) GetTrade(ctx context.Context, id int64) (Trade, error) {
 		&i.Amount,
 		&i.Price,
 		&i.TradeType,
+		&i.Status,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }
 
 const listTrades = `-- name: ListTrades :many
-SELECT id, account_id, symbol, amount, price, trade_type, created_at FROM trades
+SELECT id, account_id, symbol, amount, price, trade_type, status, created_at, updated_at FROM trades
 ORDER BY account_id
 LIMIT $1
 OFFSET $2
@@ -106,7 +113,9 @@ func (q *Queries) ListTrades(ctx context.Context, arg ListTradesParams) ([]Trade
 			&i.Amount,
 			&i.Price,
 			&i.TradeType,
+			&i.Status,
 			&i.CreatedAt,
+			&i.UpdatedAt,
 		); err != nil {
 			return nil, err
 		}

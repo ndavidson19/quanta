@@ -7,27 +7,50 @@ package db
 
 import (
 	"context"
-	"database/sql"
 )
 
 const createLogs = `-- name: CreateLogs :one
-INSERT INTO audit_logs (action) VALUES ($1) RETURNING id, account_id, action, timestamp
+INSERT INTO audit_logs (
+  account_id,
+  action,
+  action_type,
+  action_description
+) VALUES (
+  $1, $2, $3, $4
+)
+RETURNING id, account_id, action, action_type, action_description, performed_by, affected_record, timestamp
 `
 
-func (q *Queries) CreateLogs(ctx context.Context, action sql.NullString) (AuditLog, error) {
-	row := q.db.QueryRowContext(ctx, createLogs, action)
+type CreateLogsParams struct {
+	AccountID         int64  `json:"account_id"`
+	Action            string `json:"action"`
+	ActionType        string `json:"action_type"`
+	ActionDescription string `json:"action_description"`
+}
+
+func (q *Queries) CreateLogs(ctx context.Context, arg CreateLogsParams) (AuditLog, error) {
+	row := q.db.QueryRowContext(ctx, createLogs,
+		arg.AccountID,
+		arg.Action,
+		arg.ActionType,
+		arg.ActionDescription,
+	)
 	var i AuditLog
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
 		&i.Action,
+		&i.ActionType,
+		&i.ActionDescription,
+		&i.PerformedBy,
+		&i.AffectedRecord,
 		&i.Timestamp,
 	)
 	return i, err
 }
 
 const listLogs = `-- name: ListLogs :many
-SELECT id, account_id, action, timestamp FROM audit_logs ORDER BY account_id LIMIT $1 OFFSET $2
+SELECT id, account_id, action, action_type, action_description, performed_by, affected_record, timestamp FROM audit_logs ORDER BY account_id LIMIT $1 OFFSET $2
 `
 
 type ListLogsParams struct {
@@ -48,6 +71,10 @@ func (q *Queries) ListLogs(ctx context.Context, arg ListLogsParams) ([]AuditLog,
 			&i.ID,
 			&i.AccountID,
 			&i.Action,
+			&i.ActionType,
+			&i.ActionDescription,
+			&i.PerformedBy,
+			&i.AffectedRecord,
 			&i.Timestamp,
 		); err != nil {
 			return nil, err

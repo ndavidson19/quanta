@@ -1,10 +1,14 @@
 -- name: CreateAccount :one
 INSERT INTO accounts (
   owner, 
+  name,
   balance,
-  currency
+  currency,
+  created_at,
+  last_updated,
+  deleted_at
 ) VALUES (
-  $1, $2, $3
+  $1, $2, $3, $4, $5, $6, $7
 )
 RETURNING *;
 

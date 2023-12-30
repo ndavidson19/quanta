@@ -7,32 +7,43 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const createDeposit = `-- name: CreateDeposit :one
 INSERT INTO deposits (
-    account_id,
-    amount
+  account_id,
+  amount,
+  created_at,
+  updated_at
 ) VALUES (
-    $1, $2
+  $1, $2, $3, $4
 )
 
-RETURNING id, account_id, amount, created_at
+RETURNING id, account_id, amount, created_at, updated_at
 `
 
 type CreateDepositParams struct {
-	AccountID int64 `json:"account_id"`
-	Amount    int64 `json:"amount"`
+	AccountID int64     `json:"account_id"`
+	Amount    int64     `json:"amount"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
 }
 
 func (q *Queries) CreateDeposit(ctx context.Context, arg CreateDepositParams) (Deposit, error) {
-	row := q.db.QueryRowContext(ctx, createDeposit, arg.AccountID, arg.Amount)
+	row := q.db.QueryRowContext(ctx, createDeposit,
+		arg.AccountID,
+		arg.Amount,
+		arg.CreatedAt,
+		arg.UpdatedAt,
+	)
 	var i Deposit
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
 		&i.Amount,
 		&i.CreatedAt,
+		&i.UpdatedAt,
 	)
 	return i, err
 }

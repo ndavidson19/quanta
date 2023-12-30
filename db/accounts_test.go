@@ -1,27 +1,37 @@
 package db
 
 import (
-	"testing"
-	"time"
 	"context"
 	"database/sql"
+	"testing"
+	"time"
+
 	"github.com/ndavidson19/quanta-backend/util"
 	"github.com/stretchr/testify/require"
 )
 
-func createRandomAccount(t *testing.T) Account{
+func createRandomAccount(t *testing.T) Account {
+	user := createRandomUser(t)
+
 	arg := CreateAccountParams{
-		Owner:    util.RandomOwner(),
-		Balance:  util.RandomBalance(),
-		Currency: util.RandomCurrency(),
-}
+		Owner:       user.Username,
+		Name:        util.RandomOwner(),
+		Balance:     util.RandomBalance(),
+		Currency:    util.RandomCurrency(),
+		CreatedAt:   time.Now().UTC(),
+		LastUpdated: time.Now().UTC(),
+		DeletedAt:   sql.NullTime{Time: time.Now().UTC(), Valid: true},
+	}
 	account, err := testQueries.CreateAccount(context.Background(), arg)
 	require.NoError(t, err)
 	require.NotEmpty(t, account)
-	
+
 	require.Equal(t, arg.Owner, account.Owner)
 	require.Equal(t, arg.Balance, account.Balance)
 	require.Equal(t, arg.Currency, account.Currency)
+	require.Equal(t, arg.CreatedAt, account.CreatedAt)
+	require.Equal(t, arg.LastUpdated, account.LastUpdated)
+	require.Equal(t, arg.DeletedAt, account.DeletedAt)
 
 	require.NotZero(t, account.ID)
 	require.NotZero(t, account.CreatedAt)
