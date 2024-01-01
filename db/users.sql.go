@@ -28,7 +28,7 @@ INSERT INTO users (
     ) VALUES (
     $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12
     )
-RETURNING username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at
+RETURNING username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at, role
 `
 
 type CreateUserParams struct {
@@ -75,6 +75,7 @@ func (q *Queries) CreateUser(ctx context.Context, arg CreateUserParams) (User, e
 		&i.LockedUntil,
 		&i.ResetToken,
 		&i.ResetTokenExpiresAt,
+		&i.Role,
 	)
 	return i, err
 }
@@ -90,7 +91,7 @@ func (q *Queries) DeleteUser(ctx context.Context, username string) error {
 }
 
 const getUser = `-- name: GetUser :one
-SELECT username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at FROM users
+SELECT username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at, role FROM users
 WHERE username = $1 LIMIT 1
 `
 
@@ -110,12 +111,13 @@ func (q *Queries) GetUser(ctx context.Context, username string) (User, error) {
 		&i.LockedUntil,
 		&i.ResetToken,
 		&i.ResetTokenExpiresAt,
+		&i.Role,
 	)
 	return i, err
 }
 
 const getUserForUpdate = `-- name: GetUserForUpdate :one
-SELECT username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at FROM users
+SELECT username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at, role FROM users
 WHERE username = $1 LIMIT 1
 FOR UPDATE
 `
@@ -136,12 +138,13 @@ func (q *Queries) GetUserForUpdate(ctx context.Context, username string) (User, 
 		&i.LockedUntil,
 		&i.ResetToken,
 		&i.ResetTokenExpiresAt,
+		&i.Role,
 	)
 	return i, err
 }
 
 const listUsers = `-- name: ListUsers :many
-SELECT username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at FROM users
+SELECT username, hashed_password, full_name, email, phone_number, password_changed_at, created_at, last_login_at, login_attempts, locked_until, reset_token, reset_token_expires_at, role FROM users
 ORDER BY username
 LIMIT $1
 OFFSET $2
@@ -174,6 +177,7 @@ func (q *Queries) ListUsers(ctx context.Context, arg ListUsersParams) ([]User, e
 			&i.LockedUntil,
 			&i.ResetToken,
 			&i.ResetTokenExpiresAt,
+			&i.Role,
 		); err != nil {
 			return nil, err
 		}

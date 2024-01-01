@@ -101,4 +101,5 @@ type User struct {
 	LockedUntil         sql.NullTime   `json:"locked_until"`
 	ResetToken          sql.NullString `json:"reset_token"`
 	ResetTokenExpiresAt sql.NullTime   `json:"reset_token_expires_at"`
+	Role                string         `json:"role"`
 }

@@ -10,7 +10,8 @@ CREATE TABLE "users" (
   "login_attempts" int DEFAULT 0,
   "locked_until" timestamptz,
   "reset_token" varchar,
-  "reset_token_expires_at" timestamptz
+  "reset_token_expires_at" timestamptz,
+  "role" varchar NOT NULL DEFAULT 'depositor'
 );
 
 CREATE TABLE "accounts" (
